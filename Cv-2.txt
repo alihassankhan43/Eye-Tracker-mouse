@@ -1,0 +1,66 @@
+			Eye Mouse
+
+Cv-2
+Using to use webcam with value of 0 as to detect 1st webcam connected to device as I have no built in webcam I will be using my Mobile phone as Webcam .cam=cv2.VideoCapture(0)
+The video will be running continuously to detect frame after frame to calculate eye movement so its required that capture should be restriction to simply put it in we need a infinite loop.
+
+ While True:
+-,frame=cam.read() #first attribute is ignored and we are now using frame that's what we need to read
+cv2.imshow('Whatever the file name',frame) # to show some output we will display live webcam to give us some 	
+					     perspective
+cv2.waitkey() #allows you to display a window that has been shown with the cv2. imshow method for a specified 	 		period of time
+To convert frame colour in some simple colour to make detection easier and accurate we will us another cv2 function 
+rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)# will convert the color
+output = face_mesh.process(rgb_frame)#To process rgb in face mesh in output given
+landmark_points = output.multi_face_landmarks# It will detect nose,eyes,forhead,etc to create axis.
+
+To flip the inverted image of webcam we will is cv2.flip command to flip the frame by 1 to flip it vertically
+ frame = cv2.flip(frame, 1)
+__________________________________________________________________________________________________________________
+
+Mediapipe
+To detect face,eye tracking and eye movement we will be using face_mesh from mediapipe library.
+face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True) # targeting a specific landmark like an (eye)
+
+ landmark points 
+lanmark x is X axis 
+landmark y is Y axis 
+landmark z is Depth preception 
+
+landmark_points = output.multi_face_landmarks
+    frame_h, frame_w, _ = frame.shape        #hight and width and frame.shape to differntiate b/w them
+    if landmark_points:
+        landmarks = landmark_points[0].landmark
+        for id, landmark in enumerate(landmarks[474:478]):# detecting a specific landmark from 474/478 is righteye
+            x = int(landmark.x * frame_w)   # frame_w*landmark.x because x axis has width.
+            y = int(landmark.y * frame_h)   # frame_h*landmark.y because y axis has length.
+            cv2.circle(frame, (x, y), 3, (0, 255, 0))	# to detect land marks specifically by drawing circle on 							frame with x,y axis and rgb colour.
+ 
+	Reason:(int to float(x,y)) to draw a circle we requird intiger number and this was a very long float
+
+
+__________________________________________________________________________________________________________________
+
+Pyautogui
+
+enumerate:As we know that we have multiple land marks even in specific area to control mouse smoothly we would need a single point to control specific axis of mouse by assiging differnt id's 
+
+ for id, landmark in enumerate(landmarks[474:478]): #enumerate to assign different id from point 474t o 478.
+
+
+if id == 1:
+                screen_x = screen_w * landmark.x # assigning x to screen width to scale
+                screen_y = screen_h * landmark.y # assigning y to screen hight to scale
+                pyautogui.moveTo(screen_x, screen_y)# to control mouse cursor
+        left = [landmarks[145], landmarks[159]] # adding left eye to control clicks
+        for landmark in left:
+            x = int(landmark.x * frame_w)
+            y = int(landmark.y * frame_h)
+            cv2.circle(frame, (x, y), 3, (0, 255, 255))
+        if (left[0].y - left[1].y) < 0.004: # adjusting differnce to control click on y axis
+            pyautogui.click() # click command of puautogui library
+            pyautogui.sleep(1)# to count the second after action will be performed
+    cv2.imshow('Eye Controlled Mouse', frame)
+    cv2.waitKey(1)
+
+
